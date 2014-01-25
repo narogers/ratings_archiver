@@ -1,2 +1,6 @@
+# Ignore temporay files
 tmp/*
+*.swp
 
+# Ignore configuration files after the initial commit
+.env
