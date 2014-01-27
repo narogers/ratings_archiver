@@ -4,6 +4,7 @@ tmp/*
 
 # Ignore generated files like databases
 db/*.sqlite3
+db/schema.db
 
 # Ignore configuration files after the initial commit
 .env
