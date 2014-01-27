@@ -3,6 +3,7 @@ require 'rubygems'
 require 'sinatra'
 require 'sinatra/assetpack'
 require 'haml'
+require 'sass'
 
 require 'active_record'
 require 'sqlite3'
@@ -25,15 +26,24 @@ class RatingsArchiver < Sinatra::Base
   
     # Package up the Javascript assets which are stored mostly in the vendor
     # subdirectory underneath /app/js
-    js :app, '/js/ratings-archiver.js', [
+    js :app, [
       '/js/vendor/**/*.js',
       '/js/application.js'
     ]
+    js :leaflet_tutorial, [
+      '/js/d3tutorial.js',
+    ]
+
     # Do the same for the CSS source files
-    css :application, '/css/ratings-archiver.css', [
-      '/css/vendor/**/*.js',
+    css :application, [
+      #'/css/vendor/**/*.css',
       '/css/application.css'
     ]
+    css :leaflet_tutorial, [
+      '/css/testFile.css',
+      '/css/d3tutorial.css'
+    ] 
+    
     js_compression :jsmin
     css_compression :sass  
   }
@@ -41,12 +51,13 @@ class RatingsArchiver < Sinatra::Base
   # One last detail before getting down to business - pointing to our
   # subdirectory of views
   set :views, Proc.new { File.join(root, "views") }
+  set :haml, { format: :html5 }
 
   get '/' do
     'Hello world'
   end
  
   get '/d3demo' do
-    haml :d3demo, format: :html5
+    haml :d3demo 
   end
 end

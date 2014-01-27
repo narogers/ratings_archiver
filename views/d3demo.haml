@@ -1,9 +1,13 @@
 %html
   %head
     %title Ratebeer Visualization Tool
-    != css :application
-    != js :app
+    = css :application
+    = css :leaflet_tutorial
+
+    = js :app
  
   %body
-    %h1 Hello world
-    != js 'd3demo'
+    %h1 Ratings by score
+    .barchart
+ 
+    = js :leaflet_tutorial
