@@ -17,7 +17,7 @@ class BreweryDb
       name: name,
     }
     endpoint = '/breweries'
-
+ 
     response = json_request(endpoint, options) 
 
     # Need to iterate over the results set. First do some normalization to shift everything
@@ -31,10 +31,10 @@ class BreweryDb
          brewery = b
          break
        end
-    end
+    end unless response.nil?
    
     if brewery.nil?
-       puts "<< Brewery could not be validated >>"
+       warn "<< Brewery could not be validated >>"
     end
    
     brewery

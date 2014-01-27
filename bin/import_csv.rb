@@ -9,7 +9,7 @@ require 'optparse'
 require 'require_all'
 
 # Local classes to include
-require_rel '../app'
+require_rel '../app/models'
 require_rel '../lib'
 
 # Start by parsing the name of the input file along with the encoding. By default it is
@@ -37,7 +37,7 @@ end.parse!
 # Since it needs something to parse throw an exception if you run into a problem
 raise OptionParser::MissingArgument if options[:input].empty?
 if (not File.exists?(options[:input]))
-  puts "<< Could not locate #{options[:input]} for processing >>" 
+  puts "Could not locate #{options[:input]} for processing" 
   raise OptionParser::InvalidArgument 
 end
 
@@ -45,6 +45,7 @@ end
 # like in Rails
 database_configuration = YAML::load(File.open('config/database.yml'))
 ActiveRecord::Base.establish_connection(database_configuration)
+BreweryDb.api_key = ENV['BREWERYDB_KEY']
 
 # Now that we are ready to go open the file and dump everything into a hash so it can be
 # loaded into our nice ActiveRecord models after some merging of sources from BreweryDB
@@ -75,10 +76,11 @@ ratings = CSV.read(options[:input], "r:#{options[:encoding]}",
 ratings.shift
 
 ratings.each do |rating| 
-  puts "<< Importing #{rating[1]} (#{rating[0]}) >>"
+  puts "--"
+  puts "Importing #{rating[1]} (#{rating[0]})"
 
   if Rating.exists?(ratebeer_id: rating[0]) then 
-    puts "<< UPDATE OR SKIP RECORD >>"
+    puts "Rating already exists - skipping entry"
   else
     reviewed_on = rating[10]
     begin
@@ -89,8 +91,43 @@ ratings.each do |rating|
       puts "Defaulting to nil"
       reviewed_on = nil
     end
+ 
+    brewery_name = rating[2]
+    puts "Resolving brewery '#{brewery_name}' in the database(s)"
+    brewery_id = nil
 
-    rating = Rating.new(
+    if Brewery.exists?(name: brewery_name) then
+      brewery = Brewery.find_by(name: brewery_name)
+    else
+      brewery_details = BreweryDb.brewery(brewery_name)
+      # For now just gloss over any breweries that present a problem. 
+      # Eventually some sort of robust logic will be needed to handle edge 
+      # cases (use information from the CSV file directly?)      
+      if brewery_details.nil?
+        warn "Unable to resolve #{brewery_name} - skipping to the next entry"
+        brewery = Brewery.create(
+          name: brewery_name,
+          state: rating[12],
+          city: rating[13],
+        )
+        next
+      end
+
+      brewery_location = BreweryDb.brewery_location(brewery_details[:id])
+      brewery = Brewery.create(
+        brewerydb_id: brewery_details[:id],
+	name: brewery_name,
+	website: brewery_details[:website],
+	description: brewery_details[:description],
+	country: brewery_location[:countryIsoCode],
+	state: rating[12],
+	city: rating[13],
+	latitude: brewery_location[:latitude],
+	longitude: brewery_location[:longitude]
+      )
+    end
+
+    rating = Rating.create(
       ratebeer_id: rating[0],
       name: rating[1],
       appearance: rating[3],
@@ -100,10 +137,11 @@ ratings.each do |rating|
       overall: rating[7],
       computed_score: rating[8],
       review: rating[9],
-      rated_on: reviewed_on,
-    ).save!
-    puts "<< Adding beer to local database >>"
-    
-    # TODO : Supplement with information from BreweryDB
+      rated_on: reviewed_on
+    )
+
+    brewery.ratings = brewery.ratings.push(rating)
+    brewery.save    
+    puts "#{rating.name} has been associated with #{brewery.name}"
   end
 end
