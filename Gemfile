@@ -13,6 +13,8 @@ gem 'dotenv'
 gem 'hashie'
 gem 'httparty'
 gem 'require_all'
+# Alternate solution for geolocation
+gem 'cloudmate'
 
 # Debugging tools
 gem 'pry'

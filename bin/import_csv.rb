@@ -14,6 +14,9 @@ require_rel '../lib'
 
 # Start by parsing the name of the input file along with the encoding. By default it is
 # assumed to be ISO 8859-1 since most Excel spreadsheets are in this format
+#
+# TODO : Handle the instance where the input argument is not provided more
+#        gracefully than throwing a Ruby exception
 options = {}
 OptionParser.new do |opts|
   options[:input] = ''
@@ -37,7 +40,7 @@ end.parse!
 # Since it needs something to parse throw an exception if you run into a problem
 raise OptionParser::MissingArgument if options[:input].empty?
 if (not File.exists?(options[:input]))
-  puts "Could not locate #{options[:input]} for processing" 
+  warn "Could not locate #{options[:input]} for processing" 
   raise OptionParser::InvalidArgument 
 end
 
@@ -69,7 +72,7 @@ BreweryDb.api_key = ENV['BREWERYDB_KEY']
 #
 # Eventually all of this could be folded into a helper model which takes a row and converts
 # it to a Ruby object automatically. For now let's do it manually.
-ratings = CSV.read(options[:input], "r:#{options[:encoding]}", 
+ratings = CSV.read(options[:input], "r:#{options[:encoding]}:UTF-8", 
   { col_sep: options[:delimiter] })
 # Pop off the first row assuming that it is a list of fields rather than an actual
 # value
@@ -94,38 +97,20 @@ ratings.each do |rating|
  
     brewery_name = rating[2]
     puts "Resolving brewery '#{brewery_name}' in the database(s)"
-    brewery_id = nil
 
     if Brewery.exists?(name: brewery_name) then
       brewery = Brewery.find_by(name: brewery_name)
     else
-      brewery_details = BreweryDb.brewery(brewery_name)
-      # For now just gloss over any breweries that present a problem. 
-      # Eventually some sort of robust logic will be needed to handle edge 
-      # cases (use information from the CSV file directly?)      
-      if brewery_details.nil?
-        warn "Unable to resolve #{brewery_name} - skipping to the next entry"
-        brewery = Brewery.create(
-          name: brewery_name,
-          state: rating[12],
-          city: rating[13],
-        )
-        next
-      end
-
-      brewery_location = BreweryDb.brewery_location(brewery_details[:id])
+      # Since BreweryDB is rate limited to 400 requests with the free account
+      # per day we can't actually do the latitude and longitude import at the
+      # time of creation. Instead we'll defer that to a separate script which
+      # can process in batches of 100 per day after checking the rate limit
       brewery = Brewery.create(
-        brewerydb_id: brewery_details[:id],
-	name: brewery_name,
-	website: brewery_details[:website],
-	description: brewery_details[:description],
-	country: brewery_location[:countryIsoCode],
-	state: rating[12],
-	city: rating[13],
-	latitude: brewery_location[:latitude],
-	longitude: brewery_location[:longitude]
+        name: brewery_name,
+        state: rating[12],
+        city: rating[13],
       )
-    end
+   end
 
     rating = Rating.create(
       ratebeer_id: rating[0],
