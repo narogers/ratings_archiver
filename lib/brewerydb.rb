@@ -10,35 +10,51 @@ class BreweryDb
   
   @@api_key = nil
 
-  # Resolve a brewery's ID from the name and then return it so you can use it
-  # as a key for doing other resolutions (location, status, etc) 
-  def self.brewery_id_for(name)
+  # Resole a brewery based on name. If you get more than one result the city, state, and
+  # country fields can be used to refine the results to the right value 
+  def self.brewery(name, limits={city: '', state: '', country: ''})
     options = {
-      q: name,
-      type: 'brewery'
+      name: name,
     }
-    endpoint = '/search' 
+    endpoint = '/breweries'
 
-    response = json_request(endpoint, options)
-    # Since the default search may return more than the desired brewery the naive
-    # approach will be to take the first result. This will probably require future
-    # tweaking but eventually the goal is also use city and state as a validation
-    # tool 
-    response.first.id
+    response = json_request(endpoint, options) 
+
+    # Need to iterate over the results set. First do some normalization to shift everything
+    # to lowercase then do a direct string comparison. If  you get a hit then return that.
+    # If not then iterate over the list a second time and return the first result that
+    # matches the given city, state, and country. If all else fails match on the brewery
+    # whose leading characters match
+    brewery = nil 
+    response.each do |b|
+       if b[:name].downcase.eql? name.downcase
+         brewery = b
+         break
+       end
+    end
+   
+    if brewery.nil?
+       puts "<< Brewery could not be validated >>"
+    end
+   
+    brewery
   end
-
-  # Returns only the first location at the moment as the details from
-  # Ratebeer do not provide enough context to differentiate between
-  # taprooms versus brewpubs versus production locations
-  def self.brewery_location_for(id)
+  
+  # After resolving the brewery's ID you can then get additional information. With a
+  # premium BreweryDB account you can merge these two but that currently costs $60 per
+  # year
+  #
+  # This is hardly robust which means that it will assume there is only one result. If 
+  # not then try with a different ID
+  def self.brewery_location(id)
     options = {}
     endpoint = "/brewery/#{id}/locations"
     
     response = json_request(endpoint, options)
-    response.first
+    response.empty? ? nil : response.first
   end
 
-  def self.beers_by(brewery_id)
+  def self.beers_by_brewery(brewery_id)
     options = {}
     endpoint = "/brewery/#{brewery_id}/beers"
     response = json_request(endpoint, options)
@@ -73,11 +89,12 @@ class BreweryDb
   end
 
   def self.json_request(endpoint, options={})
+    # TODO : Stop failing silently if the API key is nil
     return nil unless not api_key.nil?
     options.merge!({
       key: api_key
     })
-    response = get(endpoint, query, options)
+    response = get(endpoint, query: options)
     Hashie::Mash.new(response)['data'] if response.code == 200
   end
 end

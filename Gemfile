@@ -10,6 +10,8 @@ gem 'sinatra-twitter-bootstrap', :require => 'sinatra/twitter-bootstrap'
 
 # Libraries to abstract configuration of API keys and such
 gem 'dotenv'
+gem 'hashie'
+gem 'httparty'
 gem 'require_all'
 
 # Debugging tools
