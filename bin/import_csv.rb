@@ -70,12 +70,26 @@ ActiveRecord::Base.establish_connection(database_configuration)
 # it to a Ruby object automatically. For now let's do it manually.
 ratings = CSV.read(options[:input], "r:#{options[:encoding]}", 
   { col_sep: options[:delimiter] })
-ratings[1..10].each do |rating| 
+# Pop off the first row assuming that it is a list of fields rather than an actual
+# value
+ratings.shift
+
+ratings.each do |rating| 
   puts "<< Importing #{rating[1]} (#{rating[0]}) >>"
 
   if Rating.exists?(ratebeer_id: rating[0]) then 
     puts "<< UPDATE OR SKIP RECORD >>"
   else
+    reviewed_on = rating[10]
+    begin
+      (date, time) = reviewed_on.split(' ')[0,1]
+      reviewed_on = DateTime.strptime reviewed_on, '%m/%d/%Y %I:%M:%S %p'  
+    rescue ArgumentError
+      puts "Could not parse date #{rating[10]} properly"
+      puts "Defaulting to nil"
+      reviewed_on = nil
+    end
+
     rating = Rating.new(
       ratebeer_id: rating[0],
       name: rating[1],
@@ -86,8 +100,10 @@ ratings[1..10].each do |rating|
       overall: rating[7],
       computed_score: rating[8],
       review: rating[9],
-      rated_on: DateTime.parse(rating[10]),
+      rated_on: reviewed_on,
     ).save!
     puts "<< Adding beer to local database >>"
+    
+    # TODO : Supplement with information from BreweryDB
   end
 end
