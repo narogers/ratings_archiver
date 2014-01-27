@@ -1,6 +1,9 @@
-# Ignore temporay files
+# Ignore temporary files
 tmp/*
 *.swp
+
+# Ignore generated files like databases
+db/*.sqlite3
 
 # Ignore configuration files after the initial commit
 .env
