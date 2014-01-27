@@ -6,7 +6,8 @@ gem 'sinatra-activerecord'
 gem 'sinatra-assetpack'
 
 # Supporting libraries for easy layout
-gem 'sinatra-twitter-bootstrap', :require => 'sinatra/twitter-bootstrap'
+#gem 'sinatra-twitter-bootstrap', :require => 'sinatra/twitter-bootstrap'
+gem 'haml'
 
 # Libraries to abstract configuration of API keys and such
 gem 'dotenv'

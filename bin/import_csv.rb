@@ -9,7 +9,7 @@ require 'optparse'
 require 'require_all'
 
 # Local classes to include
-require_rel '../app/models'
+require_rel '../models'
 require_rel '../lib'
 
 # Start by parsing the name of the input file along with the encoding. By default it is
