@@ -4,18 +4,24 @@
 // experience
 console.log('STARTING D3 TUTORIAL')
 
-var dataset = []
-while (dataset.length < 20) {
-  // Generate a random number between 0.5 and 5.0
-  seed = Math.random()*5;
-  seed = Math.min(seed, 5);
-  seed = Math.max(seed, 0.5);
-
-  dataset.push(seed);
+var dataset = [];
+var current_score = 0.5;
+while (current_score < 5.0) {
+  total = Math.floor(Math.random()*10);
+  point = {
+    score: current_score,
+    count: total
+  };
+  dataset.push(point);        
+  current_score += 0.1;
 }
+ 
+var svg_dimensions = {height: 500, width: 1000};
+var bar_dimensions = [];
+bar_dimensions['padding'] = 5; 
+bar_dimensions['width'] = 
+  Math.floor(svg_dimensions['width'] / dataset.length - bar_dimensions['padding'])
 
-var svg_dimensions = {height: 300, width: 500};
-var bar_dimensions = {width: 20};
 var baseline = 50;
 
 var svg = d3.select('div#charts')
@@ -25,20 +31,35 @@ var svg = d3.select('div#charts')
             .attr('width', svg_dimensions['width'])
   
 var graph_values = svg.selectAll('rect')
-                      .data(dataset)
-                      .enter()
-                      .append('rect')
+  .data(dataset)
+  .enter()
+  .append('rect')
 graph_values.attr('width', bar_dimensions['width'])
   .attr('height', function(d) {
-      return Math.round(d*60);
+      return Math.round(d['count']*20);
     }) 
   .attr('x', function(d, i) {
-      return (i*bar_dimensions['width']*1.5);
+      return i * (bar_dimensions['width'] + bar_dimensions['padding']);
     })
   .attr('y', function(d, i) {
-      console.log("Element value => " + Math.round(d*80));
-      console.log("Y offset for element " + i + " => " + 
-        (svg_dimensions['height']-Math.round(d*80)))
-      return svg_dimensions['height']-(d*60);
+      return svg_dimensions['height']-(d['count']*20)-baseline;
+    })
+  .attr('fill', function(d) {
+      return "rgb(0, 0, " + (255 - (d['count']*25)) + ")";
     })
   .classed('graph', true)
+
+var labels = svg.selectAll('text')
+  .data(dataset)
+  .enter()
+  .append('text')
+  .attr('x', function(d, i) {
+      return i * (bar_dimensions['width'] + bar_dimensions['padding']);
+    })
+  .attr('y', function(d) {
+      return svg_dimensions['height'] - (Math.floor(baseline / 2))
+    })
+  .text(function(d) {
+      label = d['score'] + '';
+      return label.substr(0,3);
+    })
