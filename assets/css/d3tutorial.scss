@@ -1,18 +1,13 @@
-.barChart {
-  display: inline-block;
-  background-color: rgb(232, 232, 232);
-  width: auto;
-  padding: 10px;
+$graph_height: 500;
+$graph_width: 250;
 
-  .value {
-    display: inline-block;
-    margin-right: 10px;
-    margin-top: 20px;
-    width: 20px;
-    background-color: rgb(128, 128, 255);
-  
-    &:last-of-type {
-      margin-right: 0;
-    }
+#charts svg {
+  display: block;
+  background-color: rgb(232, 232, 232);
+
+  .graph {
+    fill: rgb(64, 64, 255);
+    stroke: rgb(64, 64, 255);
+    stroke-width: 1px;
   }
 }
