@@ -8,18 +8,9 @@
     = js :leaflet_tutorial 
   %body
     #charts
-    %button{id: 'animation_control'} 
-      Stop animation
 
     :javascript
       initializeChart();
-      chart_refresh = setInterval(function() {
-        console.log('Initiating data refresh ...');
+      setInterval(function() {
         refreshValues();
-      }, 5000);
-
-      d3.select('#animation_control')
-        .on('click')(function() {
-           alert('Stopping the animation');
-           clearInterval(chart_refresh); 
-         });
+      }, 2000);
