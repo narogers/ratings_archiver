@@ -78,55 +78,52 @@ ratings = CSV.read(options[:input], "r:#{options[:encoding]}:UTF-8",
 # value
 ratings.shift
 
-ratings.each do |rating| 
+ratings.each do |row| 
   puts "--"
-  puts "Importing #{rating[1]} (#{rating[0]})"
+  puts "#{row[1]} (#{row[0]})"
 
-  if Rating.exists?(ratebeer_id: rating[0]) then 
-    puts "Rating already exists - skipping entry"
-  else
-    reviewed_on = rating[10]
-    begin
-      (date, time) = reviewed_on.split(' ')[0,1]
-      reviewed_on = DateTime.strptime reviewed_on, '%m/%d/%Y %I:%M:%S %p'  
-    rescue ArgumentError
-      puts "Could not parse date #{rating[10]} properly"
-      puts "Defaulting to nil"
-      reviewed_on = nil
-    end
- 
-    brewery_name = rating[2]
-    puts "Resolving brewery '#{brewery_name}' in the database(s)"
+  rating = Rating.find_or_create_by(ratebeer_id: row[0])
 
-    if Brewery.exists?(name: brewery_name) then
-      brewery = Brewery.find_by(name: brewery_name)
-    else
-      # Since BreweryDB is rate limited to 400 requests with the free account
-      # per day we can't actually do the latitude and longitude import at the
-      # time of creation. Instead we'll defer that to a separate script which
-      # can process in batches of 100 per day after checking the rate limit
-      brewery = Brewery.create(
-        name: brewery_name,
-        state: rating[12],
-        city: rating[13],
-      )
-   end
-
-    rating = Rating.create(
-      ratebeer_id: rating[0],
-      name: rating[1],
-      appearance: rating[3],
-      aroma: rating[4],
-      flavor: rating[5],
-      palate: rating[6],
-      overall: rating[7],
-      computed_score: rating[8],
-      review: rating[9],
-      rated_on: reviewed_on
-    )
-
-    brewery.ratings = brewery.ratings.push(rating)
-    brewery.save    
-    puts "#{rating.name} has been associated with #{brewery.name}"
+  reviewed_on = row[10]
+  begin
+    (date, time) = reviewed_on.split(' ')[0,1]
+    reviewed_on = DateTime.strptime reviewed_on, '%m/%d/%Y %I:%M:%S %p'  
+  rescue ArgumentError
+    warn "Could not generate date from input #{row[10]}"
+    warn "Defaulting to nil"
+    reviewed_on = nil
   end
+ 
+  brewery_name = row[2]
+  puts "Resolving brewery '#{brewery_name}' in the database(s)"
+
+  brewery = Brewery.find_or_create_by(name: brewery_name)
+  brewery.update(
+    state: row[12],
+    city: row[13],
+  )
+
+  # Since BreweryDB is rate limited to 400 requests with the free account
+  # per day we can't actually do the latitude and longitude import at the
+  # time of creation. Instead we'll defer that to a separate script which
+  # can process in batches of 100 per day after checking the rate limit
+
+  rating.update(
+     name: row[1],
+     appearance: row[3],
+     aroma: row[4],
+     flavor: row[5],
+     palate: row[6],
+     overall: row[7],
+     computed_score: row[8],
+     review: row[9],
+     style: row[14],
+     rated_on: reviewed_on
+   )
+
+   brewery.ratings = brewery.ratings.push(rating)
+
+   rating.save
+   brewery.save    
+   puts "#{rating.name} has been associated with #{brewery.name}"
 end
