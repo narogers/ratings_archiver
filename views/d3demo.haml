@@ -16,9 +16,24 @@
         font-size: 12px;
       }
     = js :app
-    = js :leaflet_tutorial 
+    = js :leaflet 
   %body
     #charts
 
     :javascript
-      initializeChart();
+       tutorial_options = {
+         start: 0,
+         finish: 5,
+         step: 0.1,
+         upperBound: 50
+       };
+       D3Tutorial.init(tutorial_options);
+       
+       data = D3Tutorial.generateRandomData();
+       D3Graph.init({data : data });
+       D3Graph.render('#charts');
+
+       setInterval(function() {
+         newInputs = D3Tutorial.generateRandomData();
+         D3Graph.refresh(newInputs);
+       }, 2000);

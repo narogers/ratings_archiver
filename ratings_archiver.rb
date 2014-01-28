@@ -36,7 +36,8 @@ class RatingsArchiver < Sinatra::Base
       '/js/vendor/**/*.js',
       '/js/application.js'
     ]
-    js :leaflet_tutorial, [
+    js :leaflet, [
+      '/js/lib/d3graph.js',
       '/js/d3tutorial.js',
     ]
 
