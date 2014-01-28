@@ -11,8 +11,9 @@
       %h1== #{@range}
 
     - container :fluid do
-      %div{id: 'overview'}
-        %dl
+      %section#overview
+        %h3 Overview
+        %dl{class: 'dl-horizontal'}
           %dt.total-ratings Number of ratings
           %dd.total-ratings --
 
@@ -25,13 +26,9 @@
           %dt.unique-styles Unique styles
           %dd.unique-styles --
 
-      %section#geographic
-        %div.nationalMap
-        %div.stateChart
-  
       %section#statistics
-        %div.ratingsDistributionChart
-        %div.scoresDistributionChart
+        %h3 Score distributions
+        %div#scoreDistributionChart
 
     :javascript
       var ratings = #{@ratings.to_json(only: [:id, :name, :brewery_id, :style, :computed_score, :rated_on])}
@@ -48,7 +45,57 @@
           numberFormatter(d3.median(scores))
         ) 
       }
+  
+      function renderGeographicData() {
+      }
+ 
+      function renderScoreDistribution() {
+        // Because not all values may be present we need to force them to be
+        // at least 0. Use a d3 formatter to ensure that the values come out
+        // the way we want instead of as random floats
+        breakdownByScore = [];
+        keyFormat = d3.format('0.0f');
+
+        // At some point remove the hard coding
+        scoreToIndex = d3.scale.linear()
+          .domain([0.5, 5.0])
+          .range([0, 45])
+        $.each(scoreToIndex.ticks(50), function(i, s) {
+          breakdownByScore[i] = { x: s, y: 0 }
+        });
+        $.each(ratings, function(i, r) {
+          index = keyFormat(scoreToIndex(r['computed_score']));
+          breakdownByScore[index]['y']++;
+        });        
+       
+        var graph = new Rickshaw.Graph({
+          element: document.querySelector('#scoreDistributionChart'),
+          renderer: 'bar',
+          series: [{
+            data: breakdownByScore,
+            color: 'teal'
+          }]
+        });
+        var hoverDetails = new Rickshaw.Graph.HoverDetail({
+          graph: graph,
+          xFormatter: function(x) { return '' },
+          yFormatter: function(y) { return y + ' ratings ' }
+        });
+        var xAxis = new Rickshaw.Graph.Axis.X({
+          graph: graph
+        });
+        var yAxis = new Rickshaw.Graph.Axis.Y({
+          graph: graph,
+          orientation: 'left'
+        });      
+  
+        graph.render();
+        xAxis.render();
+
+        return graph;
+      }
 
       // At some point soon this should be extracted into a utility
       // file instead of done inline ... at some point
       updateOverview(); 
+      scoresGraph = renderScoreDistribution();
