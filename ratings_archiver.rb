@@ -67,7 +67,7 @@ class RatingsArchiver < Sinatra::Base
   get '/d3demo' do
     haml :d3demo
   end
- 
+   
   get '/summary' do
     @ratings = collectRatings()
     @range = createRangeLabel(@ratings) 

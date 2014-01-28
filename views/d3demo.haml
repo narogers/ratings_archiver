@@ -18,15 +18,16 @@
     = js :app
     = js :leaflet 
   %body
-    #ratingsByScore
-    #overallDistribution
+    #ratingsDistribution
+    #overallScoreDistribution
+    #nationalMap
     
     :javascript
        score_options = {
-         start: 0,
+         start: 0.5,
          finish: 5,
          step: 0.1,
-         upperBound: 200
+         upperBound: 50
        };
        scores = D3UTILS.D3Tutorial();
        scores.init(score_options);
@@ -35,9 +36,11 @@
        
        scores_graph.init({
          data : data, 
-         svg_height: 300,
-         svg_width: 500,
-         svg_margin: 35 });
+         element: '#ratingsDistribution',
+         height: 300,
+         width: 500,
+         margin: 30 });
+       console.log('Rendering Graph One')
        scores_graph.render('#ratingsByScore');
 
        graph_options = {
@@ -54,16 +57,12 @@
        overall_graph = new D3UTILS.D3Graph();
        overall_graph.init({
          data: overall_data,
-         svg_height: 300,
-         svg_width: 500,
-         svg_margin: 30
+         element: '#overallScoreDistribution',
+         height: 300,
+         width: 500,
+         margin: 30
        });
-       overall_graph.render('#overallDistribution');
+       console.log('Rendering Graph Two')
+       overall_graph.render('#overallScoreDistribution');
  
-       setInterval(function() {
-          new_scores = scores.generateRandomData();
-          overall = overall_distribution.generateRandomData();
-      
-          scores_graph.refresh(new_scores);
-          overall_graph.refresh(overall);
-       }, 2000);
+       
