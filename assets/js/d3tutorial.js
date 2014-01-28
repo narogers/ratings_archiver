@@ -4,24 +4,43 @@
 // experience
 console.log('STARTING D3 TUTORIAL')
 
-ratings_count = generateRandomDataset(0.5, 20);
-
-var svg_dimensions = {height: 500, width: 800};
+var svg_dimensions = [];
 var bar_dimensions = [];
-bar_dimensions['padding'] = 5; 
-bar_dimensions['width'] = Math.floor(svg_dimensions['width'] / dataset.length) 
-  - bar_dimensions['padding'];
-  
-var baseline = 50;
+var baseline;
+var bars, labels;
 
-var svg = d3.select('div#charts')
-            .append('svg')
-            .attr('id', 'ratings_distribution')
-            .attr('height', svg_dimensions['height'])
-            .attr('width', svg_dimensions['width'])
-bars = drawBars(dataset);
-labels = applyLabels(dataset);
+function initializeChart() {
+  ratings_count = generateRandomDataset(0.5, 20);
+
+  svg_dimensions = {height: 500, width: 800};
+  bar_dimensions['padding'] = 5; 
+  bar_dimensions['width'] = Math.floor(svg_dimensions['width'] / dataset.length) 
+    - bar_dimensions['padding'];
   
+  baseline = 50;
+
+  svg = d3.select('div#charts')
+    .append('svg')
+    .attr('id', 'ratings_distribution')
+    .attr('height', svg_dimensions['height'])
+    .attr('width', svg_dimensions['width'])
+  bars = drawBars(dataset);
+  labels = applyLabels(dataset);
+}
+
+function refreshValues() {
+  new_values = generateRandomDataset(0.5, 20);
+  bars.data(new_values)
+    .transition()
+    .duration(500)
+    .attr('y', function(d, i) {
+      return svg_dimensions['height']-(d['count']*20)-baseline;
+    })
+    .attr('height', function(d) {
+      return Math.round(d['count']*20); 
+    })
+}
+
 // Generate a random dataset
 function generateRandomDataset(step, upper_bound) {
   // Set sensible defaults if the parameters are not passed to the function
@@ -67,7 +86,6 @@ function drawBars(dataset) {
       return 'teal';
     })
     .classed('graph', true)
-
   return graph_values 
 }
 
@@ -77,14 +95,13 @@ function drawBars(dataset) {
 function applyLabels(dataset, interval) {
   dataset = dataset || []
   interval = interval || 1  
+  normalize_label = d3.format('0.1f');
 
   score_labels = svg.selectAll('text')
     .data(dataset)
     .enter()
     .append('text')
     .filter(function(d, i) {
-      console.log("[" + i + "] " + d['score']);
-      console.log('Display this value => ' + (i % interval == 0));
       return (i % interval == 0);
     })
     .attr('x', function(d, i) {
@@ -100,8 +117,7 @@ function applyLabels(dataset, interval) {
     .attr('font-weight', 'bold')
     .attr('text-anchor', 'middle')
     .text(function(d) {
-      label = Math.round(d['score']*10) / 10 + '';
-      return label.substr(0,3);
+      return normalize_label(d['score']);
     });
 
    return score_labels;
