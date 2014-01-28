@@ -18,22 +18,52 @@
     = js :app
     = js :leaflet 
   %body
-    #charts
-
+    #ratingsByScore
+    #overallDistribution
+    
     :javascript
-       tutorial_options = {
+       score_options = {
          start: 0,
          finish: 5,
          step: 0.1,
-         upperBound: 50
+         upperBound: 200
        };
-       D3Tutorial.init(tutorial_options);
+       scores = D3UTILS.D3Tutorial();
+       scores.init(score_options);
+       data = scores.generateRandomData();
+       scores_graph = D3UTILS.D3Graph();
        
-       data = D3Tutorial.generateRandomData();
-       D3Graph.init({data : data });
-       D3Graph.render('#charts');
+       scores_graph.init({
+         data : data, 
+         svg_height: 300,
+         svg_width: 500,
+         svg_margin: 35 });
+       scores_graph.render('#ratingsByScore');
 
+       graph_options = {
+         start: 0,
+         finish: 20,
+         step: 1,
+         upperBound: 100
+       };
+
+       overall_distribution = new D3UTILS.D3Tutorial();
+       overall_distribution.init(graph_options);
+       overall_data = overall_distribution.generateRandomData();
+
+       overall_graph = new D3UTILS.D3Graph();
+       overall_graph.init({
+         data: overall_data,
+         svg_height: 300,
+         svg_width: 500,
+         svg_margin: 30
+       });
+       overall_graph.render('#overallDistribution');
+ 
        setInterval(function() {
-         newInputs = D3Tutorial.generateRandomData();
-         D3Graph.refresh(newInputs);
+          new_scores = scores.generateRandomData();
+          overall = overall_distribution.generateRandomData();
+      
+          scores_graph.refresh(new_scores);
+          overall_graph.refresh(overall);
        }, 2000);

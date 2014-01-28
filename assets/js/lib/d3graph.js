@@ -1,4 +1,6 @@
-D3Graph = (function() 
+var D3UTILS = D3UTILS || {}
+
+D3UTILS.D3Graph = function() 
 {
   // Setting up defaults here
   var svg_dimensions = {
@@ -18,7 +20,7 @@ D3Graph = (function()
       bar_xscale, 
       bar_yscale;
       
-  var init = function(defaults) {
+  init = function(defaults) {
     options = defaults;
     svg_dimensions = {
       height: options['svg_height'] || 500, 
@@ -30,6 +32,7 @@ D3Graph = (function()
     bar_dimensions = {
       width: Math.floor((svg_dimensions['width'] - svg_dimensions['margin'] * 2) / data.length)
     }
+
     bar_xscale = d3.scale.linear()
       .domain([
         d3.min(data, function(d) { return d['x'] }),
@@ -51,9 +54,9 @@ D3Graph = (function()
       .nice()
    
     return true;
-  };
+  },
 
-  var render = function(element) {
+  render = function(element) {
     chart = d3.select(element)
       .append('svg')
       .attr('id', 'ratings_distribution')
@@ -64,9 +67,9 @@ D3Graph = (function()
     xAxis = applyXAxis();
     yAxis = applyYAxis();
     bars = drawBars(data);
-  };
+  },
 
-  var refresh = function(newData) {
+  refresh = function(newData) {
     data = newData;
     duration = options['duration'] || 500;
 
@@ -79,7 +82,7 @@ D3Graph = (function()
       .attr('height', function(d) {
         return (svg_dimensions['height'] - bar_yscale(d['y']) - svg_dimensions['margin']);
       }) 
-  };
+  },
 
   // Private functions
   drawBars = function() {
@@ -99,7 +102,7 @@ D3Graph = (function()
       .classed('graph', true)
   
       return graph_values 
-  };
+  },
 
   applyXAxis = function() { 
     ticks = options['ticks'] || 5;
@@ -115,7 +118,7 @@ D3Graph = (function()
         ')')
       .call(xAxis);
     return xAxis;
-  }
+  },
   
   applyYAxis = function() {
     ticks = options['ticks'] || 5;
@@ -137,4 +140,4 @@ D3Graph = (function()
     render: render,
     refresh: refresh,
   };  
-}());
+};

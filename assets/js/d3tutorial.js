@@ -1,7 +1,6 @@
-// Working through the tutorial at http://alignedleft.com/tutorials/d3/
-//
-// Helper method for generating a random dataset
-D3Tutorial = (function()
+var D3UTILS = D3UTILS || {}
+
+D3UTILS.D3Tutorial = function()
 {
   var start, 
       finish, 
@@ -42,4 +41,4 @@ D3Tutorial = (function()
     generateRandomData: generateRandomData
   };
 
-}());
+};
