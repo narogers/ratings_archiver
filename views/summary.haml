@@ -1,0 +1,54 @@
+!!!
+%html{lang: 'en'}
+  %head
+    %title== Ratings Summary: #{@range}
+    = bootstrap_assets
+    = css :application
+    = js :app
+  
+  %body
+    %div.page-header
+      %h1== #{@range}
+
+    - container :fluid do
+      %div{id: 'overview'}
+        %dl
+          %dt.total-ratings Number of ratings
+          %dd.total-ratings --
+
+          %dt.average-score Average score
+          %dd.average-score --
+
+          %dt.median-score Median score
+          %dd.median-score --
+
+          %dt.unique-styles Unique styles
+          %dd.unique-styles --
+
+      %section#geographic
+        %div.nationalMap
+        %div.stateChart
+  
+      %section#statistics
+        %div.ratingsDistributionChart
+        %div.scoresDistributionChart
+
+    :javascript
+      var ratings = #{@ratings.to_json(only: [:id, :name, :brewery_id, :style, :computed_score, :rated_on])}
+
+      function updateOverview() {
+        scores = ratings.map(function(r) { return r['computed_score'] })
+        numberFormatter = d3.format('0.3r');
+
+        $('dd.total-ratings').text(ratings.length + ' Ratings');
+        $('dd.average-score').text(
+          numberFormatter(d3.mean(scores))
+        );
+        $('dd.median-score').text(
+          numberFormatter(d3.median(scores))
+        ) 
+      }
+
+      // At some point soon this should be extracted into a utility
+      // file instead of done inline ... at some point
+      updateOverview(); 
