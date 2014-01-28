@@ -16,12 +16,10 @@ function initializeChart() {
   maximum_value = 20;
   ratings_count = generateRandomDataset(interval, maximum_value);
 
-  svg_dimensions = {height: 500, width: 800};
-  bar_dimensions['padding'] = 5; 
+  svg_dimensions = {height: 500, width: 960, margin: 60};
   bar_dimensions['width'] = 
-    Math.floor(svg_dimensions['width'] / dataset.length) 
-    - bar_dimensions['padding'];
-  baseline = 50;
+    Math.floor((svg_dimensions['width'] - svg_dimensions['margin'] * 2) 
+      / dataset.length) 
 
   bar_xposition = d3.scale.linear()
     .domain([
@@ -32,7 +30,7 @@ function initializeChart() {
     .nice();
   bar_yposition = d3.scale.linear()
     .domain([0, maximum_value])
-    .rangeRound([svg_dimensions['height'] - baseline, 0])
+    .rangeRound([svg_dimensions['height'] - (svg_dimensions['margin'] * 2), 0])
     .nice() 
   svg = d3.select('div#charts')
     .append('svg')
@@ -40,7 +38,7 @@ function initializeChart() {
     .attr('height', svg_dimensions['height'])
     .attr('width', svg_dimensions['width'])
   bars = drawBars(dataset);
-  labels = applyLabels(dataset, 5);
+  labels = applyLabels(dataset, 50);
 }
 
 function refreshValues() {
@@ -52,15 +50,13 @@ function refreshValues() {
       return bar_yposition(d['count']);
     })
     .attr('height', function(d) {
-       return (svg_dimensions['height'] - baseline) - 
-         bar_yposition(d['count']);
-    })
+      return (svg_dimensions['height'] - bar_yposition(d['count']));
+    }) 
 }
 
 // Generate a random dataset
 function generateRandomDataset(step, upper_bound) {
   // Set sensible defaults if the parameters are not passed to the function
-  step = step || 0.1;
   upper_bound = upper_bound || 20;
   dataset = []
 
@@ -90,7 +86,7 @@ function drawBars(dataset) {
 
   graph_values.attr('width', bar_dimensions['width'])
     .attr('height', function(d) {
-      return (svg_dimensions['height'] - baseline) - bar_yposition(d['count']);
+      return (svg_dimensions['height'] - bar_yposition(d['count']));
     }) 
     .attr('x', function(d, i) {
       return bar_xposition(d['score']);
