@@ -13,10 +13,10 @@ var interval, maximum_value;
 
 function initializeChart() {
   interval = 0.1;
-  maximum_value = 20;
+  maximum_value = 100;
   ratings_count = generateRandomDataset(interval, maximum_value);
 
-  svg_dimensions = {height: 500, width: 960, margin: 60};
+  svg_dimensions = {height: 500, width: 960, margin: 30};
   bar_dimensions['width'] = 
     Math.floor((svg_dimensions['width'] - svg_dimensions['margin'] * 2) 
       / dataset.length) 
@@ -26,11 +26,15 @@ function initializeChart() {
       d3.min(ratings_count, function(d) { return d['score'] }),
       d3.max(ratings_count, function(d) { return d['score'] })
     ])
-    .rangeRound([0, svg_dimensions['width'] - bar_dimensions['width']])
+    .rangeRound([
+       svg_dimensions['margin'], 
+       svg_dimensions['width'] - bar_dimensions['width']])
     .nice();
   bar_yposition = d3.scale.linear()
     .domain([0, maximum_value])
-    .rangeRound([svg_dimensions['height'] - (svg_dimensions['margin'] * 2), 0])
+    .rangeRound([
+       svg_dimensions['height'] - svg_dimensions['margin'], 
+       svg_dimensions['margin']])
     .nice() 
   svg = d3.select('div#charts')
     .append('svg')
@@ -38,7 +42,7 @@ function initializeChart() {
     .attr('height', svg_dimensions['height'])
     .attr('width', svg_dimensions['width'])
   bars = drawBars(dataset);
-  labels = applyLabels(dataset, 50);
+  labels = applyLabels(dataset);
 }
 
 function refreshValues() {
@@ -86,7 +90,8 @@ function drawBars(dataset) {
 
   graph_values.attr('width', bar_dimensions['width'])
     .attr('height', function(d) {
-      return (svg_dimensions['height'] - bar_yposition(d['count']));
+      return (svg_dimensions['height'] - bar_yposition(d['count']) - 
+        svg_dimensions['margin']);
     }) 
     .attr('x', function(d, i) {
       return bar_xposition(d['score']);
@@ -111,28 +116,25 @@ function drawBars(dataset) {
 function applyLabels(dataset, interval) {
   dataset = dataset || []
   interval = interval || 1  
-  normalize_label = d3.format('0.1f');
-
-  score_labels = svg.selectAll('text')
-    .data(dataset)
-    .enter()
-    .append('text')
-    .filter(function(d, i) {
-      return (i % interval == 0);
-    })
-    .attr('x', function(d, i) {
-      return bar_xposition(d['score']);      
-    })
-    .attr('y', function(d) {
-      return svg_dimensions['height'] - (Math.floor(baseline / 2))
-    })
-    .attr('font-family', 'sans-serif')
-    .attr('font-size', '0.75em')
-    .attr('font-weight', 'bold')
-    .attr('text-anchor', 'middle')
-    .text(function(d) {
-      return normalize_label(d['score']);
-    });
-
-   return score_labels;
+ 
+  var xAxis = d3.svg.axis()
+    .scale(bar_xposition)
+    .orient('bottom')
+  svg.append('g')
+    .attr('class', 'axis')
+    .attr('transform', 'translate(0, ' + 
+      (svg_dimensions['height'] - svg_dimensions['margin']) +
+      ')')
+    .call(xAxis);
+  
+  var yAxis = d3.svg.axis()
+    .scale(bar_yposition)
+    .orient('left')
+    .ticks(5)
+  svg.append('g')
+    .attr('class', 'axis')
+    .attr('transform', 'translate(' + svg_dimensions['margin'] +
+      ', 0)')
+    .call(yAxis)
+  return xAxis;
 }
