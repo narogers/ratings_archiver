@@ -62,7 +62,7 @@ D3UTILS.D3Graph = function()
    elements.chart = elements.svg.append('g')
       .classed('chart', true)
       .attr('transform', 'translate(' + configuration.svg.margin + 
-         ', -' + configuration.svg.margin + ")")
+         ', ' + configuration.svg.margin + ")")
     
     elements.xAxis = applyXAxis();
     elements.yAxis = applyYAxis();
@@ -117,11 +117,13 @@ D3UTILS.D3Graph = function()
 
     graph_values.attr('width', configuration.bar.width)
       .attr('height', function(d) {
-        return configuration.svg.height - scales.yScale(d['y'])
+        return configuration.chart.height - scales.yScale(d['y'])
       }) 
       .attr('x', function(d, i) { return scales.xScale(d['x']); })
       .attr('y', function(d, i) { return scales.yScale(d['y']); })
-      .attr('fill', 'teal')
+      .attr('fill', 'rgb(239, 243, 255)')
+      .attr('stroke-width', '1px')
+      .attr('stroke', 'rgb(8, 81, 156)')
       .classed('graph', true)
   
       return graph_values 
@@ -137,7 +139,7 @@ D3UTILS.D3Graph = function()
     elements.svg.append('g')
       .attr('class', 'axis xAxis')
       .attr('transform', 'translate(' + 
-        (configuration.svg.margin + configuration.bar.width) +
+        (configuration.svg.margin + configuration.bar.width / 2) + 
         ', ' + (configuration.svg.height - configuration.svg.margin) + 
         ')')
       .call(xAxis);
@@ -153,7 +155,8 @@ D3UTILS.D3Graph = function()
       .ticks(ticks);
     elements.svg.append('g')
       .attr('class', 'axis yAxis')
-      .attr('transform', 'translate(' + configuration.svg.margin + ', 0)')
+      .attr('transform', 'translate(' + configuration.svg.margin + ', ' +
+         configuration.svg.margin + ')')
       .call(yAxis)
     return yAxis;
   };
