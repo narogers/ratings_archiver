@@ -48,7 +48,7 @@
         ratingsByStyle = analyzeStyles();
         ratingsByScore = analyzeScores();
         updateOverview();
-        //renderCharts();
+        renderCharts();
       });
 
       function updateOverview() {
@@ -118,15 +118,38 @@
       }
  
       function renderCharts() {
+        default_height = 300;
+        default_width = 500;
+
         computed_graph = D3UTILS.D3Graph();
         computed_graph.init({
           data: generateAxesByLength(ratingsByScore['computed']),
           element: '#scoreDistribution',
-          height: 300,
-          width: 500,
+          height: default_height,
+          width: default_width,
           margin: 35 
         });
+        flavor_graph = D3UTILS.D3Graph();
+        flavor_graph.init({
+          data: generateAxesByLength(ratingsByScore['flavor']),
+          element: '#flavorDistribution',
+          height: default_height,
+          width: default_width,
+          margin: 35 
+        });
+        /*
+        palate_graph = D3UTILS.D3Graph();
+        palate_graph.init({
+          data: generateAxesByLength(ratingsByScore['palate']),
+          element: '#palateDistribution',
+          height: default_height,
+          width: default_width,
+          margin: 35 
+        });
+        */
         computed_graph.render();
+        flavor_graph.render();
+        //palate_graph.render();
       }
 
       // Given a score hash creates the x and y axes values for use in

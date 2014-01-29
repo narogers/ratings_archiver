@@ -111,7 +111,7 @@ D3UTILS.D3Graph = function()
   // Private functions
   drawBars = function() {
     graph_values = elements.chart.selectAll('rect')
-      .data(dataset)
+      .data(data)
       .enter()
       .append('rect')
 
@@ -143,7 +143,6 @@ D3UTILS.D3Graph = function()
       .attr('y2', configuration.svg.height - configuration.svg.margin)
       .attr('stroke', '1px')
       .attr('color', 'rgb(255, 0, 255)');
-    alert('Now loading the tick marks');
     elements.svg.append('g')
       .attr('class', 'axis xAxis')
       .attr('transform', 'translate(' + 
