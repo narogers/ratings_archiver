@@ -4,6 +4,7 @@ require 'sinatra'
 require 'sinatra/assetpack'
 require 'haml'
 require 'sass'
+require 'builder'
 
 require 'active_record'
 require 'sqlite3'
@@ -111,6 +112,12 @@ class RatingsArchiver < Sinatra::Base
     end_of_range = Time.new(params[:year].to_i, params[:month].to_i, Time.days_in_month(params[:month].to_i, params[:year].to_i))
   
     Rating.where(rated_on: start_of_range..end_of_range).order(:rated_on).to_json(except: [:description, :abv, :review, :format, :brewerydb_id])
+  end
+
+  get '/rating/:id', :provides => ['xml'] do |id|
+    @rating = Rating.find_by(ratebeer_id: id)
+    warn "Record not found for #{id}" if @rating.nil?
+    builder :rating
   end
 
   private
