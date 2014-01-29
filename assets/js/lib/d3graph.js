@@ -135,7 +135,15 @@ D3UTILS.D3Graph = function()
     var xAxis = d3.svg.axis()
       .scale(scales.xScale)
       .orient('bottom');
-
+    
+    elements.svg.append('line')
+      .attr('x1', configuration.svg.margin)
+      .attr('y1', configuration.svg.height - configuration.svg.margin)
+      .attr('x2', configuration.svg.width - configuration.svg.margin)
+      .attr('y2', configuration.svg.height - configuration.svg.margin)
+      .attr('stroke', '1px')
+      .attr('color', 'rgb(255, 0, 255)');
+    alert('Now loading the tick marks');
     elements.svg.append('g')
       .attr('class', 'axis xAxis')
       .attr('transform', 'translate(' + 

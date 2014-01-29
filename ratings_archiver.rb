@@ -68,24 +68,16 @@ class RatingsArchiver < Sinatra::Base
     haml :d3demo
   end
    
-  get '/summary' do
+  get %r{summary(\/\d{4})?(\/\d{2})?} do |year=nil, month=nil|
+    puts params
     @ratings = collectRatings()
     @range = createRangeLabel(@ratings) 
 
     haml :summary, format: :html5 
   end
 
-  # Otherwise use URL parameters to scope it to a particular year 
-  get '/summary/:year' do |y|
-    @ratings = collectRatings()
-    @range = createRangeLabel(@ratings) 
-   haml :summary
-  end
-
-  # Or even a month
-  get '/summary/:year/:month' do |y, m|
-    @ratings = collectRatings()
-    haml :summary
+  get %r{ratings(\/\d{4})?(\/\d{2})?} do |year=nil, month=nil|
+    Rating.all.order(:rated_on).to_json(except: [:review])
   end
 
   private
