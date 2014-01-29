@@ -34,10 +34,10 @@ class RatingsArchiver < Sinatra::Base
     # subdirectory underneath /app/js
     js :app, [
       '/js/vendor/**/*.js',
+      '/js/lib/d3graph.js',
       '/js/application.js'
     ]
     js :leaflet, [
-      '/js/lib/d3graph.js',
       '/js/d3tutorial.js',
     ]
 
