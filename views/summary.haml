@@ -1,14 +1,14 @@
 !!!
 %html{lang: 'en'}
   %head
-    %title== Ratings Summary: #{@range}
+    %title== Ratings Summary: #{@title} 
     = bootstrap_assets
     = css :application
     = js :app
   
   %body
     %div.page-header
-      %h1== #{@range}
+      %h1== #{@title}
 
     - container :fluid do
       %section#overview
@@ -32,11 +32,10 @@
 
     :javascript
       var ratings;
-      d3.json('/ratings', function(error, json) {
+      d3.json('#{@callback}', function(error, json) {
         if (error) return console.warn(error);
         ratings = json;
         updateOverview();
-        alert('Ratings have been loaded from server');
       });
 
       function updateOverview() {

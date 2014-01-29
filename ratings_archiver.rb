@@ -68,41 +68,89 @@ class RatingsArchiver < Sinatra::Base
     haml :d3demo
   end
    
-  get %r{summary(\/\d{4})?(\/\d{2})?} do |year=nil, month=nil|
-    puts params
-    @ratings = collectRatings()
-    @range = createRangeLabel(@ratings) 
+  get '/summary' do
+    @timeRange = getRange()
+    @callback = '/ratings'
+    @title = "#{@timeRange[:from][:label]} to #{@timeRange[:to][:label]}" 
 
     haml :summary, format: :html5 
   end
 
-  get %r{ratings(\/\d{4})?(\/\d{2})?} do |year=nil, month=nil|
-    Rating.all.order(:rated_on).to_json(except: [:review])
+  get '/summary/:year' do
+    @timeRange = getRange(params[:year])
+    @callback = "/ratings/#{params[:year]}"
+    @title = "#{@timeRange[:from][:label]} to #{@timeRange[:to][:label]}" 
+    
+    haml :summary, format: :html5
+  end
+
+  get '/summary/:year/:month' do
+    @timeRange = getRange(params[:year], params[:month])
+    @callback = "/ratings/#{params[:year]}/#{params[:month]}" 
+    @title = "#{@timeRange[:from][:label]}" 
+   haml :summary, format: :html5
+  end 
+ 
+  get '/ratings' do
+    start_of_range = Rating.order(:rated_on).first.rated_on
+    end_of_range = Time.now
+
+    Rating.where(rated_on: start_of_range..end_of_range).order(:rated_on).to_json(except: [:description, :abv, :review, :format, :brewerydb_id])
+  end
+
+  get '/ratings/:year' do  
+    start_of_range = Time.new(params[:year].to_i, 1, 1)
+    end_of_range = Time.new(params[:year].to_i, 12, 31)
+
+    Rating.where(rated_on: start_of_range..end_of_range).order(:rated_on).to_json(except: [:description, :abv, :review, :format, :brewerydb_id])
+       
+  end
+
+  get '/ratings/:year/:month' do
+    start_of_range = Time.new(params[:year].to_i, params[:month].to_i, 1)
+    end_of_range = Time.new(params[:year].to_i, params[:month].to_i, Time.days_in_month(params[:month].to_i, params[:year].to_i))
+  
+    Rating.where(rated_on: start_of_range..end_of_range).order(:rated_on).to_json(except: [:description, :abv, :review, :format, :brewerydb_id])
   end
 
   private
-    def collectRatings(year: nil, month: nil)
-      ratings = Rating.all.order(:rated_on)
-    end
+    def getRange(year=nil, month=nil)
+      range = {} 
 
-    def createRangeLabel(ratings)
-      rated_by_time = ratings.order(:rated_on)
-      start = rated_by_time.first
-      finish = rated_by_time.last
-   
-      output = ""
-      if finish.rated_on.year == start.rated_on.year
-        if finish.rated_on.month == start.rated_on.month
-          output = start.rated_on.strftime('%B') + ' to ' +
-            finish.rated_on.strftime('%B %Y')
+      case
+        when (year.present? and month.present?)
+          range[:from] = { 
+            year: year,
+            month: month,
+            label: Time.new(year, month).strftime('%B %Y')
+          }
+        when (year.present?)
+          range[:from] = {
+            year: year,
+            month: 1,
+            label: "January #{year}"
+          }
+          range[:to] = {
+            year: year,
+            month: 12,
+            label: "December #{year}"
+          }
         else
-          output = start.rated_on.strftime('%B %Y')
-        end
-      else
-        output = start.rated_on.strftime('%B %Y') + ' to ' +
-          finish.rated_on.strftime('%B %Y') 
-      end
+          firstRating = Rating.order(:rated_on).first.rated_on
+          lastRating = Rating.order(:rated_on).last.rated_on
 
-      output
+          range[:from] = {
+            year: firstRating.year,
+            month: firstRating.month,
+            label: firstRating.strftime('%B %Y')
+          }
+          range[:to] = {
+            year: lastRating.year,
+            month: lastRating.month,
+            label: lastRating.strftime('%B %Y')
+          }
+      end
+     
+      range
     end
 end
