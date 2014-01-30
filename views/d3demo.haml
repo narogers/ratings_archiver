@@ -29,10 +29,10 @@
          step: 0.1,
          upperBound: 50
        };
-       scores = D3UTILS.D3Tutorial();
+       scores = new D3UTILS.D3Tutorial();
        scores.init(score_options);
        data = scores.generateRandomData();
-       scores_graph = D3UTILS.D3Graph();
+       scores_graph = new D3UTILS.D3Graph();
        
        scores_graph.init({
          data : data, 

@@ -13,155 +13,38 @@
     - container :fluid do
       %section#overview
         %h3 Overview
-        %dl{class: 'dl-horizontal'}
-          %dt.total-ratings Number of ratings
-          %dd.total-ratings --
+        -row do
+          %div.col-xs-12
+          %dl{class: 'dl-horizontal'}
+            %dt.total-ratings Number of ratings
+            %dd.total-ratings --
+  
+            %dt.average-score Average score
+            %dd.average-score --
+  
+            %dt.median-score Median score
+            %dd.median-score --
+  
+            %dt.unique-styles Unique styles
+            %dd.unique-styles --
 
-          %dt.average-score Average score
-          %dd.average-score --
-
-          %dt.median-score Median score
-          %dd.median-score --
-
-          %dt.unique-styles Unique styles
-          %dd.unique-styles --
-
+    -container :fluid do
       %section#statistics
         %h3 Score distributions
-        %div#scoreDistributionCharts
-          %div#scoreDistribution
-          %div#aromaDistribution
-          %div#appearanceDistribution
-          %div#flavorDistribution
-          %div#palateDistribution
-          %div#overallDistribution
+        -row do
+          %div{id: 'scoreDistribution', class: 'col-sm-12'}
+        %div{id: 'scoreDistributionCharts'}
+          -row do
+            %div{id: 'aromaDistribution', class: 'col-md-6'}
+            %div{id: 'appearanceDistribution', class: 'col-md-6'}
+          - row do
+            %div{id: 'flavorDistribution', class: 'col-md-6'}
+            %div{id: 'palateDistribution', class: 'col-md-6'}
+          -row do
+            %div{id: 'overallDistribution', class: 'col-md-6'}
 
     :javascript
-      var ratings,
-          ratingsByStyle,
-          ratingsByScore,
-          scores;
-
-      d3.json('#{@callback}', function(error, json) {
-        if (error) return console.warn(error);
-        ratings = json;
-        ratingsByStyle = analyzeStyles();
-        ratingsByScore = analyzeScores();
-        updateOverview();
-        renderCharts();
+      $(document).ready(function() {
+        initializeRatings('#{@callback}');
       });
 
-      function updateOverview() {
-        scores = ratings.map(function(r) { return r.computed_score });
-        numberFormatter = d3.format('0.3r');
-
-        $('dd.total-ratings').text(ratings.length + ' Ratings');
-        $('dd.average-score').text(
-          numberFormatter(d3.mean(scores))
-        );
-        $('dd.median-score').text(
-          numberFormatter(d3.median(scores))
-        ) 
-        $('dd.unique-styles').text(
-          ratingsByStyle.keys().length
-        )
-      }
-   
-      function analyzeStyles() {
-        ratingsByStyle = d3.nest()
-          .key(function(r) { return r.style })
-          .map(ratings, d3.map);
- 
-        return ratingsByStyle;
-      }
-
-      function analyzeScores() {
-        ratingsByScore = {
-          flavor: [],
-          palate: [],
-          aroma: [],
-          appearance: [],
-          overall: [],
-          computed: []
-        };
-
-        // Initialize the flavor and aroma arrays
-        for (i = 1; i <= 5; i++) {
-          ratingsByScore['palate'][i] = [];
-          ratingsByScore['aroma'][i] = [];
-        };
-        for (i = 1; i <= 10; i++) {
-          ratingsByScore['flavor'][i] = [];
-          ratingsByScore['appearance'][i] = [];
-        };
-        for (i = 1; i <= 20; i++) {
-          ratingsByScore['overall'][i] = [];
-        };
-        keyFormatter = d3.format('0.1f');
-        for (i = 0.5; i <= 5.0; i += 0.1) {
-          ratingsByScore['computed'][keyFormatter(i)] = [];
-        }
-
-        ratings.forEach(function(r) {
-          ratingsByScore['flavor'][r.flavor].push(r.ratebeer_id);
-          ratingsByScore['palate'][r.palate].push(r.ratebeer_id);
-          ratingsByScore['aroma'][r.aroma].push(r.ratebeer_id);
-          ratingsByScore['appearance'][r.appearance].push(r.ratebeer_id);
-          ratingsByScore['overall'][r.overall].push(r.ratebeer_id);
-          ratingsByScore['computed'][keyFormatter(r.computed_score)].push(r.ratebeer_id);
-        });
-       
-        return ratingsByScore;
-      }
-
-      function renderGeographicData() {
-      }
- 
-      function renderCharts() {
-        default_height = 300;
-        default_width = 500;
-
-        computed_graph = D3UTILS.D3Graph();
-        computed_graph.init({
-          data: generateAxesByLength(ratingsByScore['computed']),
-          element: '#scoreDistribution',
-          height: default_height,
-          width: default_width,
-          margin: 35 
-        });
-        flavor_graph = D3UTILS.D3Graph();
-        flavor_graph.init({
-          data: generateAxesByLength(ratingsByScore['flavor']),
-          element: '#flavorDistribution',
-          height: default_height,
-          width: default_width,
-          margin: 35 
-        });
-        palate_graph = D3UTILS.D3Graph();
-        palate_graph.init({
-          data: generateAxesByLength(ratingsByScore['palate']),
-          element: '#palateDistribution',
-          height: default_height,
-          width: default_width,
-          margin: 35 
-        });
-        
-        computed_graph.render();
-        flavor_graph.render();
-        palate_graph.render();
-      }
-
-      // Given a score hash creates the x and y axes values for use in
-      // the graphs
-      function generateAxesByLength(hash) {
-        axes = [];
-        Object.keys(hash).sort(sortByNumericValue).forEach(function(k) {
-          axes.push({x: k, y: hash[k].length });
-        });
-      
-        return axes;
-      }
-
-      function sortByNumericValue(a, b) {
-        return parseFloat(a) - parseFloat(b);
-      }

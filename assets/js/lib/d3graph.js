@@ -4,10 +4,10 @@ D3UTILS.D3Graph = function()
 {
   // Other variables that need to be tracked but are calculated when the
   // init() method is called
-  var configuration = [],
-    data = [],
-    elements = [],
-    scales = [];
+  var configuration = [];
+  var data = [];
+  var elements = [];
+  var scales = [];
       
   init = function(settings) {
     configuration.svg = {
@@ -51,19 +51,30 @@ D3UTILS.D3Graph = function()
         0
       ])
    
-    return true;
+      return true;
   },
 
-  render = function(container) {
+  debug = function() {
+    console.log('DEBUG OUTPUT');
+    console.log('============');
+    console.log('Configuration keys are defined for ' + Object.keys(configuration));
+    console.log('Element keys are defined for ' + Object.keys(elements));
+    console.log('Scale keys are defined for ' + Object.keys(scales));
+    console.log('SVG is defined as ' + elements.svg);
+    console.log('Chart is defined as ' + elements.chart);
+  };
+
+  render = function() {
     elements.svg = d3.select(elements.container)
       .append('svg')
       .attr('height', configuration.svg.height)
       .attr('width', configuration.svg.width)
-   elements.chart = elements.svg.append('g')
+    elements.chart = elements.svg.append('g')
       .classed('chart', true)
       .attr('transform', 'translate(' + configuration.svg.margin + 
          ', ' + configuration.svg.margin + ")")
-    
+ 
+    debug();
     elements.xAxis = applyXAxis();
     elements.yAxis = applyYAxis();
     elements.bars = drawBars(data);
@@ -136,6 +147,7 @@ D3UTILS.D3Graph = function()
       .scale(scales.xScale)
       .orient('bottom');
     
+    console.log('Extending axis for elements ' + elements.svg); 
     elements.svg.append('line')
       .attr('x1', configuration.svg.margin)
       .attr('y1', configuration.svg.height - configuration.svg.margin)
@@ -143,6 +155,7 @@ D3UTILS.D3Graph = function()
       .attr('y2', configuration.svg.height - configuration.svg.margin)
       .attr('stroke', '1px')
       .attr('color', 'rgb(255, 0, 255)');
+     
     elements.svg.append('g')
       .attr('class', 'axis xAxis')
       .attr('transform', 'translate(' + 
