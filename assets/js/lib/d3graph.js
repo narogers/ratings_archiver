@@ -9,7 +9,7 @@ D3UTILS.D3Graph = function()
   var elements = [];
   var scales = [];
       
-  init = function(settings) {
+  function init(settings) {
     configuration.svg = {
       height: settings.height || 500, 
       width: settings.width || 960, 
@@ -52,9 +52,9 @@ D3UTILS.D3Graph = function()
       ])
    
       return true;
-  },
+  }
 
-  debug = function() {
+  function debug() {
     console.log('DEBUG OUTPUT');
     console.log('============');
     console.log('Configuration keys are defined for ' + Object.keys(configuration));
@@ -64,7 +64,7 @@ D3UTILS.D3Graph = function()
     console.log('Chart is defined as ' + elements.chart);
   };
 
-  render = function() {
+  function render() {
     elements.svg = d3.select(elements.container)
       .append('svg')
       .attr('height', configuration.svg.height)
@@ -78,9 +78,9 @@ D3UTILS.D3Graph = function()
     elements.xAxis = applyXAxis();
     elements.yAxis = applyYAxis();
     elements.bars = drawBars(data);
-  },
+  }
 
-  refresh = function(newData) {
+  function refresh(newData) {
     data = newData;
     duration = configuration.duration || 500;
 
@@ -93,9 +93,9 @@ D3UTILS.D3Graph = function()
       .attr('height', function(d) {
         return (configuration.chart.height - scales.yScale(d['y']))   
       }) 
-  },
+  }
 
-  resize = function(newWidth) {
+  function resize(newWidth) {
     container = $(elements.container).children('svg');
     dimensions = {
       height: container.height(),
@@ -110,7 +110,7 @@ D3UTILS.D3Graph = function()
   // Little method for debugging strange problems with the way that the
   // domain is being rendered so that tweaks can be made. Not a long term
   // part of the API
-  inspect = function() {
+  function inspect() {
     return { 
       svg: configuration.svg,
       chart: configuration.chart,
@@ -120,7 +120,7 @@ D3UTILS.D3Graph = function()
   }
 
   // Private functions
-  drawBars = function() {
+  function drawBars() {
     graph_values = elements.chart.selectAll('rect')
       .data(data)
       .enter()
@@ -138,9 +138,9 @@ D3UTILS.D3Graph = function()
       .classed('graph', true)
   
       return graph_values 
-  },
+  }
 
-  applyXAxis = function() { 
+  function applyXAxis() { 
     ticks = configuration.ticks || 5;
  
     var xAxis = d3.svg.axis()
@@ -164,9 +164,9 @@ D3UTILS.D3Graph = function()
         ')')
       .call(xAxis);
     return xAxis;
-  },
+  }
   
-  applyYAxis = function() {
+  function applyYAxis() {
     ticks = configuration.ticks || 5;
 
     var yAxis = d3.svg.axis()
