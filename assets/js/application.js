@@ -17,7 +17,7 @@ function initializeRatings(endpoint) {
     ratings = json;
     ratingsByStyle = analyzeStyles();
     ratingsByScore = analyzeScores();
-    visualizeScores();
+    graphs = visualizeScores();
   });
 }
 
@@ -93,37 +93,36 @@ function renderGeographicData() {
 }
  
 function renderCharts() {
-  default_height = 300;
-  default_width = 500;
+  defaults = { height: 300, 
+    width: 500 };
+  graphs['rating'] = new Rickshaw.Graph( {
+    element: document.getElementById('scoreDistributionChart'),
+    renderer: 'bar',
+    series: [{
+      color: 'rgb(102, 216, 222)',
+      data: generateAxesByLength(ratingsByScore.computed)
+    }],
+    max: getGraphCeiling(ratingsByScore.computed, 100),
+    width: 600 
+  });  
+  yAxis = new Rickshaw.Graph.Axis.Y({
+    graph: graphs.rating,
+  });
+  xAxis = new Rickshaw.Graph.Axis.X({
+    graph: graphs.rating,
+    orientation: 'bottom',
+    element: document.getElementById('scoreDistributionXAxis')
+  });
+  hoverDetail = new Rickshaw.Graph.HoverDetail({
+    graph: graphs.rating,
+    xFormatter: function(x) { return x }, 
+    yFormatter: function(y) { return y + ' ratings'}
+  });
+  graphs['rating'].render();  
+  yAxis.render();
+  xAxis.render();
 
-  graphs.computed = new D3UTILS.D3Graph();
-  graphs.computed.init({
-    data: generateAxesByLength(ratingsByScore.computed),
-    element: '#scoreDistribution',
-    height: default_height,
-    width: default_width,
-    margin: 35 
-  });
-  flavor_graph = new D3UTILS.D3Graph();
-  flavor_graph.init({
-    data: generateAxesByLength(ratingsByScore['flavor']),
-    element: '#flavorDistribution',
-    height: default_height,
-    width: default_width,
-    margin: 35 
-  });
-  palate_graph = new D3UTILS.D3Graph();
-  palate_graph.init({
-    data: generateAxesByLength(ratingsByScore['palate']),
-    element: '#palateDistribution',
-    height: default_height,
-    width: default_width,
-    margin: 35 
-  });
-  
-  graphs.computed.render();
-  //flavor_graph.render();
-  //palate_graph.render();
+  return graphs;
 }
 
 // Given a score hash creates the x and y axes values for use in
@@ -131,12 +130,39 @@ function renderCharts() {
 function generateAxesByLength(hash) {
   axes = [];
   Object.keys(hash).sort(sortByNumericValue).forEach(function(k) {
-    axes.push({x: k, y: hash[k].length });
+    axes.push({x: parseFloat(k), y: hash[k].length });
   });
 
   return axes;
 }
 
+/**
+ * Calculate the ceiling for each graph rounded to the nearest 50
+ * Intended to be used when rendering a Rickshaw graph to allow a bit of
+ * padding at the upper end of the y axis.
+ */
+function getGraphCeiling(hash, increment) {
+  var max_value = 0;
+  rounding_increment = increment || 50;
+ 
+  Object.keys(hash).forEach(function(k) {
+    max_value = (max_value < hash[k].length) ? hash[k].length : max_value;  
+  });
+  ceiling = Math.ceil(max_value / rounding_increment) * rounding_increment;
+
+  return ceiling;
+}
+
 function sortByNumericValue(a, b) {
   return parseFloat(a) - parseFloat(b);
 }
+
+/**
+ * Template to use when loading up the scores, ratings, or other tabular data
+ */
+function scoreDetailTemplate() {
+   template = document.createDocumentFragment();
+   
+   return template;
+}
+

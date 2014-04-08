@@ -6,7 +6,8 @@ gem 'sinatra-activerecord'
 gem 'sinatra-assetpack'
 
 # Supporting libraries for easy layout
-gem 'sinatra-twitter-bootstrap', :require => 'sinatra/twitter-bootstrap'
+#gem 'compass'
+gem 'bootstrap-sass'
 gem 'haml'
 gem 'sass'
 gem 'builder'
@@ -16,8 +17,6 @@ gem 'dotenv'
 gem 'hashie'
 gem 'httparty'
 gem 'require_all'
-# Alternate solution for geolocation
-gem 'cloudmate'
 
 # Debugging tools
 gem 'pry'

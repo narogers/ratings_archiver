@@ -19,9 +19,14 @@ D3UTILS.D3Graph = function()
       height: configuration.svg.height - (configuration.svg.margin * 2),
       width: configuration.svg.width - (configuration.svg.margin * 2)
     }
+    configuration.ticks = {
+      x: settings.xTickMarks || 10,
+      y: settings.yTickMarks || 5
+    }
+    configuration.title = settings.title || '';
 
-    data = settings.data || []
-    elements.container = settings.element || 'body'
+    data = settings.data || [];
+    elements.container = settings.element || 'body';
     
     // When we go to render we will translate the entire graph so there
     // is no need to make adjustments based on the margins at this
@@ -74,19 +79,19 @@ D3UTILS.D3Graph = function()
       .attr('transform', 'translate(' + configuration.svg.margin + 
          ', ' + configuration.svg.margin + ")")
  
-    debug();
+    elements.bars = drawBars(data);
     elements.xAxis = applyXAxis();
     elements.yAxis = applyYAxis();
-    elements.bars = drawBars(data);
+    elements.title = displayTitle();
   }
 
-  function refresh(newData) {
+  function refresh(newData, duration) {
     data = newData;
-    duration = configuration.duration || 500;
-
+    delay = duration || 500;
+ 
     bars.data(data)
       .transition()
-      .duration(duration)
+      .duration(delay)
       .attr('y', function(d, i) {
         return scales.yScale(d['y']);
       })
@@ -141,12 +146,12 @@ D3UTILS.D3Graph = function()
   }
 
   function applyXAxis() { 
-    ticks = configuration.ticks || 5;
- 
+    console.log('Ticks to display => ' + configuration.ticks.x);
     var xAxis = d3.svg.axis()
       .scale(scales.xScale)
-      .orient('bottom');
-    
+      .orient('bottom')
+      .ticks(configuration.ticks.x)
+      .outerTickSize(1); 
     console.log('Extending axis for elements ' + elements.svg); 
     elements.svg.append('line')
       .attr('x1', configuration.svg.margin)
@@ -167,12 +172,12 @@ D3UTILS.D3Graph = function()
   }
   
   function applyYAxis() {
-    ticks = configuration.ticks || 5;
-
+    console.log('Ticks to display => ' + configuration.ticks.y);
     var yAxis = d3.svg.axis()
       .scale(scales.yScale)
       .orient('left')
-      .ticks(ticks);
+      .ticks(configuration.ticks.y)
+      .outerTickSize(1);
     elements.svg.append('g')
       .attr('class', 'axis yAxis')
       .attr('transform', 'translate(' + configuration.svg.margin + ', ' +
@@ -180,6 +185,16 @@ D3UTILS.D3Graph = function()
       .call(yAxis)
     return yAxis;
   };
+ 
+  function displayTitle() {
+     title = configuration.title || ''
+     elements.svg.append('text')
+       .attr('x', configuration.svg.width / 2)
+       .attr('y', configuration.svg.height - (configuration.svg.margin / 2))
+       .attr('text-anchor', 'middle')
+       .attr('font-size', '16px')
+       .text(title);
+  }
 
   return {
     init: init,

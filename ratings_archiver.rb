@@ -1,27 +1,15 @@
-require 'rubygems'
+# First pull in all gems from the Gemfile
+require 'bundler'
+Bundler.require
 
-require 'sinatra'
-require 'sinatra/assetpack'
-require 'haml'
-require 'sass'
-require 'builder'
-
-require 'active_record'
-require 'sqlite3'
-require 'dotenv'
+# Load any environment variables
 Dotenv.load
 
-require 'require_all'
+# Finally source any local models and helping libraries
 require_rel 'lib'
 require_rel 'models'
 
-require 'pry'
-
 class RatingsArchiver < Sinatra::Base
-  register Sinatra::Twitter::Bootstrap::Assets
-  database_configuration = YAML::load(File.open('config/database.yml'))
-  ActiveRecord::Base.establish_connection(database_configuration)
- 
   set :root, File.dirname(__FILE__)
   register Sinatra::AssetPack
 
@@ -35,7 +23,6 @@ class RatingsArchiver < Sinatra::Base
     # subdirectory underneath /app/js
     js :app, [
       '/js/vendor/**/*.js',
-      '/js/lib/d3graph.js',
       '/js/application.js'
     ]
     js :leaflet, [

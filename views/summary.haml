@@ -2,7 +2,6 @@
 %html{lang: 'en'}
   %head
     %title== Ratings Summary: #{@title} 
-    = bootstrap_assets
     = css :application
     = js :app
   
@@ -10,10 +9,10 @@
     %div.page-header
       %h1== #{@title}
 
-    - container :fluid do
+    .container.fluid
       %section#overview
         %h3 Overview
-        -row do
+        .row
           %div.col-xs-12
           %dl{class: 'dl-horizontal'}
             %dt.total-ratings Number of ratings
@@ -28,19 +27,24 @@
             %dt.unique-styles Unique styles
             %dd.unique-styles --
 
-    -container :fluid do
+    .container.fluid
       %section#statistics
-        %h3 Score distributions
-        -row do
-          %div{id: 'scoreDistribution', class: 'col-sm-12'}
+        %h3{class: 'bg-info'} 
+          Score Distribution
+          %div{id: 'scoreDistribution', class: 'row'}
+            %div{class: 'visualization col-md-6'}
+              %div{id: 'scoreDistributionChart'}
+              %div{id: 'scoreDistributionXAxis'}
+              %div{id: 'scoreDistributionCaption'}
+            %div{class: 'scores col-md-6'}
         %div{id: 'scoreDistributionCharts'}
-          -row do
+          .row 
             %div{id: 'aromaDistribution', class: 'col-md-6'}
             %div{id: 'appearanceDistribution', class: 'col-md-6'}
-          - row do
+          .row 
             %div{id: 'flavorDistribution', class: 'col-md-6'}
             %div{id: 'palateDistribution', class: 'col-md-6'}
-          -row do
+          .row
             %div{id: 'overallDistribution', class: 'col-md-6'}
 
     :javascript

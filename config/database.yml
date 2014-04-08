@@ -1,5 +1,6 @@
 # Use sensible defaults taken directly from Rails out of the box
-adapter: sqlite3
-database: db/ratings_archiver.sqlite3
-pool: 5
-timeout: 5000
+development:
+  adapter: sqlite3
+  database: 'db/ratings_archiver.sqlite3'
+  pool: 5
+  timeout: 5000
